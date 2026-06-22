@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Queen of TikTok 👑</title>
+<style>
+  :root{
+    --pink:#fe2c55;
+    --cyan:#25f4ee;
+    --bg:#0b0b13;
+    --panel:#15151f;
+    --panel2:#1d1d2b;
+    --text:#f3f3f7;
+    --muted:#9aa0b4;
+    --gold:#ffd84d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,rgba(254,44,85,.18),transparent),
+               radial-gradient(900px 500px at 80% 10%,rgba(37,244,238,.12),transparent),
+               var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+  .crown{font-size:54px;line-height:1;filter:drop-shadow(0 4px 18px rgba(255,216,77,.5))}
+  h1{
+    font-size:clamp(34px,7vw,64px);
+    font-weight:900;letter-spacing:-1px;text-align:center;margin:6px 0 2px;
+    background:linear-gradient(90deg,var(--cyan),#fff 40%,var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{text-align:center;color:var(--muted);font-size:16px;margin-bottom:28px}
+  .center{text-align:center}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:22px;padding:30px;margin:0 auto;max-width:560px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+  }
+  .field{margin:18px 0}
+  label{display:block;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+  .at-input{display:flex;align-items:center;background:#0c0c14;border:2px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden}
+  .at-input:focus-within{border-color:var(--pink)}
+  .at-input span{padding:0 14px;font-size:22px;color:var(--cyan);font-weight:700}
+  .at-input input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:20px;padding:16px 14px 16px 0}
+  button{
+    cursor:pointer;border:0;border-radius:14px;font-weight:800;font-size:17px;
+    padding:16px 22px;width:100%;color:#fff;
+    background:linear-gradient(90deg,var(--pink),#ff5e7e);
+    box-shadow:0 10px 24px rgba(254,44,85,.35);transition:transform .08s ease;
+  }
+  button:hover{transform:translateY(-1px)}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,.18);box-shadow:none;color:var(--text)}
+  button.cyan{background:linear-gradient(90deg,var(--cyan),#76f7f3);color:#04222a;box-shadow:0 10px 24px rgba(37,244,238,.3)}
+  button.small{width:auto;padding:10px 16px;font-size:14px}
+
+  .countdown{display:flex;justify-content:center;gap:14px;margin:10px 0 4px}
+  .seg{background:#0c0c14;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 8px;min-width:74px;text-align:center}
+  .seg b{display:block;font-size:34px;font-weight:900;color:var(--gold)}
+  .seg small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+
+  .pill{display:inline-block;background:rgba(37,244,238,.12);color:var(--cyan);border:1px solid rgba(37,244,238,.3);
+    padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:10px}
+  .pill.live{background:rgba(254,44,85,.14);color:#ff7a93;border-color:rgba(254,44,85,.4)}
+
+  .msg{margin-top:14px;text-align:center;font-weight:700;min-height:22px}
+  .msg.ok{color:var(--cyan)}
+  .msg.err{color:#ff7a93}
+
+  .roster{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .tag{background:#0c0c14;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 13px;font-size:14px}
+  .count{color:var(--muted);font-size:14px;text-align:center;margin-top:8px}
+
+  /* admin */
+  .adminbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:24px 0}
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:18px}
+  .grp{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+  .grp h3{font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;justify-content:space-between}
+  .grp ol{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .grp li{background:#0c0c14;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;font-size:15px;display:flex;gap:8px;align-items:center}
+  .grp li .n{color:var(--muted);font-size:12px;width:16px}
+  .stagehdr{margin:34px 0 4px;text-align:center}
+  .stagehdr h2{font-size:24px;font-weight:900}
+  .stagehdr p{color:var(--muted);font-size:14px;margin-top:4px}
+  .rules{max-width:760px;margin:18px auto 0}
+  .rule{display:flex;gap:14px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+  .rule .step{flex:0 0 38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;
+    background:linear-gradient(135deg,var(--pink),var(--cyan));color:#0b0b13}
+  .rule h4{font-size:16px;margin-bottom:4px}
+  .rule p{color:var(--muted);font-size:14px;line-height:1.5}
+  .hidden{display:none}
+  .footer{text-align:center;margin-top:40px;color:var(--muted);font-size:12px}
+  .footer a{color:var(--muted);cursor:pointer;text-decoration:underline}
+  .note{background:rgba(255,216,77,.08);border:1px solid rgba(255,216,77,.25);color:#ffe9a3;border-radius:12px;padding:12px 14px;font-size:13px;margin-top:14px;line-height:1.5}
+  .admin-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+  input.txt{background:#0c0c14;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;padding:10px 12px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ PUBLIC SIGN-UP ============ -->
+  <div id="public">
+    <div class="center"><div class="crown">👑</div></div>
+    <h1>Queen of TikTok</h1>
+    <div class="sub">One crown. 32 queens. Last one standing wins.</div>
+
+    <div class="card">
+      <div class="center" id="gate">
+        <!-- filled by JS: either countdown or sign-up form -->
+      </div>
+    </div>
+
+    <!-- Rules on the public page -->
+    <div class="stagehdr"><h2>📜 How It Works</h2><p>Tournament starts Thursday at 10:30 PM EST</p></div>
+    <div class="rules">
+      <div class="rule"><div class="step">1</div><div>
+        <h4>32 queens → 8 groups of 4</h4>
+        <p>Everyone who signs up with their TikTok username is randomly drawn into 8 groups of 4. This is the first elimination series.</p></div></div>
+      <div class="rule"><div class="step">2</div><div>
+        <h4>Round 1 — Two strikes you're out</h4>
+        <p>In each group of 4, the lowest score each round gets a strike. <b>Two strikes and you leave.</b> Play continues until one queen is left standing per group. The 8 winners advance.</p></div></div>
+      <div class="rule"><div class="step">3</div><div>
+        <h4>Round 2 — 2 groups of 4, one strike</h4>
+        <p>The 8 winners split into 2 groups of 4. Lowest score each round gets a strike, and <b>one strike eliminates you.</b> Last queen standing in each group makes the finals.</p></div></div>
+      <div class="rule"><div class="step">4</div><div>
+        <h4>Finals — Best of 3</h4>
+        <p>The two finalists go head-to-head. First to win <b>2 out of 3</b> is crowned <b>Queen of TikTok</b> 👑.</p></div></div>
+    </div>
+
+    <div class="footer">
+      <span id="rosterCount"></span><br/><br/>
+      <a id="adminLink">admin</a>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN ============ -->
+  <div id="admin" class="hidden">
+    <div class="center"><div class="crown">👑</div></div>
+    <h1>Admin · Bracket</h1>
+    <div class="sub">Random draw &amp; tournament structure</div>
+
+    <div class="adminbar">
+      <button class="small cyan" id="drawBtn">🎲 Randomly draw 8 groups of 4</button>
+      <button class="small ghost" id="reshuffleBtn">↻ Re-draw</button>
+      <button class="small ghost" id="addTestBtn">+ Add 32 demo names</button>
+      <button class="small ghost" id="exitAdmin">← Back to sign-up</button>
+    </div>
+    <div class="center"><span class="count" id="adminCount"></span></div>
+
+    <div id="bracket"></div>
+
+    <!-- Rules -->
+    <div class="stagehdr"><h2>📜 The Rules</h2></div>
+    <div class="rules">
+      <div class="rule"><div class="step">1</div><div>
+        <h4>Sign-ups → 8 groups of 4 (32 queens)</h4>
+        <p>Everyone who enters their TikTok username is randomly drawn into 8 groups of 4. This is the first elimination series.</p></div></div>
+      <div class="rule"><div class="step">2</div><div>
+        <h4>Round 1 — Two-strike elimination</h4>
+        <p>Within each group of 4, the lowest score each round receives a strike. <b>Two strikes and you're out.</b> Play continues until one queen is left standing in the group. The 8 group winners advance.</p></div></div>
+      <div class="rule"><div class="step">3</div><div>
+        <h4>Round 2 — 2 groups of 4, one-strike elimination</h4>
+        <p>The 8 winners are split into 2 groups of 4. Now it's sudden-ish: the lowest score each round gets a strike, and <b>a single strike eliminates you.</b> Last queen standing in each group becomes a finalist.</p></div></div>
+      <div class="rule"><div class="step">4</div><div>
+        <h4>Finals — Best of 3</h4>
+        <p>The two group winners face off head-to-head. First to win <b>2 out of 3</b> is crowned <b>Queen of TikTok</b> 👑.</p></div></div>
+    </div>
+
+    <div class="footer"><span id="adminFooter"></span></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- storage ---------- */
+const LS_SIGNUPS='qott_signups';
+const LS_OPEN='qott_open';      // ET date "YYYY-MM-DD"
+const LS_TIME='qott_time';      // "HH:MM"
+const LS_BRACKET='qott_bracket';
+const LS_PASS='qott_pass';
+
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+/* ---------- shared database (Supabase) ---------- */
+const SB_URL='https://mqwevrctjsiolfwnevcp.supabase.co';
+const SB_KEY='sb_publishable_lCR7X-dX-jviQ5U0TnAH-g_II5iW_te';
+const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+async function sbList(){
+  const r=await fetch(SB_URL+'/rest/v1/signups?select=username&order=created_at.asc',{headers:SB_H});
+  if(!r.ok) throw new Error('list '+r.status);
+  return (await r.json()).map(x=>x.username);
+}
+async function sbAdd(u){
+  const r=await fetch(SB_URL+'/rest/v1/signups',{method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},body:JSON.stringify({username:u})});
+  return r.status; // 201 = added, 409 = duplicate
+}
+
+let signups = [];
+async function refreshSignups(){ try{ signups=await sbList(); return true; }catch(e){ return false; } }
+
+/* default open = today (ET) at 10:30 */
+function etTodayStr(){
+  const f=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'});
+  const p={};f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+  return `${p.year}-${p.month}-${p.day}`;
+}
+let openDate = load(LS_OPEN, "2026-06-25"); // Thursday
+let openTime = load(LS_TIME, "22:30"); // 10:30 PM EST
+
+/* current ET wall-clock as a local-interpreted Date so diffs == ET diffs */
+function nowET(){
+  const f=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',hour12:false,
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const p={};f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+  let h=p.hour==='24'?'00':p.hour;
+  return new Date(`${p.year}-${p.month}-${p.day}T${h}:${p.minute}:${p.second}`);
+}
+function target(){ return new Date(`${openDate}T${openTime}:00`); }
+function isOpen(){ return nowET().getTime() >= target().getTime(); }
+
+/* ---------- public view ---------- */
+const gate=document.getElementById('gate');
+function fmtOpen(){
+  const d=new Date(`${openDate}T${openTime}:00`);
+  return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+
+    ' at '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' EST';
+}
+function renderGate(){ renderForm(); }
+
+function tick(){
+  const cd=document.getElementById('cd');
+  if(!cd) return;
+  let ms=target()-nowET();
+  if(ms<=0){
+    cd.innerHTML=`<div class="seg" style="min-width:auto;padding:14px 18px"><b style="font-size:22px">🔴 The tournament is underway!</b></div>`;
+    return;
+  }
+  const s=Math.floor(ms/1000);
+  const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),ss=s%60;
+  cd.innerHTML=[['Days',d],['Hours',h],['Min',m],['Sec',ss]]
+    .map(([l,v])=>`<div class="seg"><b>${String(v).padStart(2,'0')}</b><small>${l}</small></div>`).join('');
+  setTimeout(tick,1000);
+}
+function renderForm(){
+  gate.innerHTML=`
+    <div class="pill live">🔴 Sign-ups are OPEN</div>
+    <p style="color:var(--muted);margin:2px 0 14px">Tournament starts ${fmtOpen()}</p>
+    <div class="countdown" id="cd"></div>
+    <div class="field">
+      <label>Your TikTok username</label>
+      <div class="at-input"><span>@</span><input id="uname" placeholder="username" autocomplete="off" maxlength="30"/></div>
+    </div>
+    <button id="joinBtn">Enter the competition 👑</button>
+    <div class="msg" id="msg"></div>
+    <div class="roster" id="roster"></div>
+    <div class="count" id="cnt"></div>`;
+  document.getElementById('joinBtn').onclick=join;
+  document.getElementById('uname').addEventListener('keydown',e=>{if(e.key==='Enter')join()});
+  renderRoster();
+  tick();
+}
+function clean(u){return u.trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'')}
+async function join(){
+  const inp=document.getElementById('uname');
+  const msg=document.getElementById('msg');
+  const btn=document.getElementById('joinBtn');
+  const u=clean(inp.value);
+  if(!u){msg.className='msg err';msg.textContent='Enter a username first.';return}
+  if(!/^[a-z0-9._]{2,30}$/.test(u)){msg.className='msg err';msg.textContent='Use letters, numbers, . or _ only.';return}
+  if(signups.some(x=>x.toLowerCase()===u)){msg.className='msg err';msg.textContent='@'+u+' is already signed up!';return}
+  btn.disabled=true; msg.className='msg'; msg.textContent='Saving…';
+  try{
+    const st=await sbAdd(u);
+    if(st===409){ msg.className='msg err'; msg.textContent='@'+u+' is already signed up!'; }
+    else if(st===201){
+      inp.value='';
+      await refreshSignups();
+      msg.className='msg ok';
+      msg.textContent= signups.length>=32 ? '👑 You\'re in! The 32 spots are full.' : '✅ You\'re in, @'+u+'!';
+    } else { msg.className='msg err'; msg.textContent='Something went wrong (code '+st+'). Try again.'; }
+  }catch(e){ msg.className='msg err'; msg.textContent='Network hiccup — try again.'; }
+  btn.disabled=false;
+  renderRoster();
+}
+function renderRoster(){
+  const r=document.getElementById('roster'); const c=document.getElementById('cnt');
+  if(r){ r.innerHTML=signups.map(u=>`<span class="tag">@${u}</span>`).join(''); }
+  if(c){ c.textContent= signups.length+' queens signed up'; }
+}
+
+/* ---------- admin ---------- */
+const pub=document.getElementById('public'), adm=document.getElementById('admin');
+document.getElementById('adminLink').onclick=()=>{
+  let pass=load(LS_PASS,null);
+  if(!pass){ pass=prompt('Set an admin passcode (you\'ll use this each time):'); if(!pass)return; save(LS_PASS,pass); }
+  else { const t=prompt('Admin passcode:'); if(t!==pass){alert('Nope.');return;} }
+  pub.classList.add('hidden'); adm.classList.remove('hidden'); refreshSignups().then(renderAdmin);
+};
+document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+async function draw(){
+  await refreshSignups();
+  const pool=shuffle(signups);
+  const field=pool.slice(0,32);
+  const alts=pool.slice(32);
+  const groups=[];
+  for(let i=0;i<8;i++) groups.push(field.slice(i*4,i*4+4));
+  const bracket={groups,alts,drawnAt:new Date().toISOString()};
+  save(LS_BRACKET,bracket);
+  renderAdmin();
+}
+document.getElementById('drawBtn').onclick=draw;
+document.getElementById('reshuffleBtn').onclick=draw;
+document.getElementById('addTestBtn').onclick=async()=>{
+  const btn=document.getElementById('addTestBtn'); btn.disabled=true;
+  await refreshSignups();
+  for(let i=1;i<=32;i++){const n='queen'+String(i).padStart(2,'0'); if(!signups.includes(n)){ await sbAdd(n); }}
+  await refreshSignups(); btn.disabled=false; renderAdmin();
+};
+
+function renderAdmin(){
+  document.getElementById('adminCount').textContent = signups.length+' signed up · field is 32';
+  const b=load(LS_BRACKET,null);
+  const host=document.getElementById('bracket');
+  if(!b || !b.groups){
+    host.innerHTML=`<div class="card"><p class="center" style="color:var(--muted)">No bracket yet. Click <b>Randomly draw</b> once sign-ups are in.<br/>You currently have <b>${signups.length}</b> queens.</p></div>`;
+    if(signups.length<32){
+      host.innerHTML+=`<div class="note center">You need 32 to fill the bracket. ${signups.length<32?('Waiting on '+(32-signups.length)+' more.'):''} You can still draw with fewer — empty slots will show as TBD.</div>`;
+    }
+    return;
+  }
+  // Round 1
+  let html=`<div class="stagehdr"><h2>Round 1 · 8 Groups of 4</h2><p>Two-strike elimination · last queen standing in each group advances</p></div>`;
+  html+=`<div class="groups">`;
+  b.groups.forEach((g,i)=>{
+    html+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
+    for(let k=0;k<4;k++){const u=g[k];html+=`<li><span class="n">${k+1}</span>${u?'@'+u:'<span style="color:var(--muted)">TBD</span>'}</li>`}
+    html+=`</ol></div>`;
+  });
+  html+=`</div>`;
+  // Round 2 (placeholders from winners)
+  html+=`<div class="stagehdr"><h2>Round 2 · 2 Groups of 4</h2><p>One-strike elimination · winner of each group makes the finals</p></div>`;
+  html+=`<div class="groups">`;
+  const semis=[['A','B','C','D'],['E','F','G','H']];
+  semis.forEach((s,i)=>{
+    html+=`<div class="grp"><h3><span>Semi ${i+1}</span><span>→ 1 advances</span></h3><ol>`;
+    s.forEach((g,k)=>{html+=`<li><span class="n">${k+1}</span>Winner of Group ${g}</li>`});
+    html+=`</ol></div>`;
+  });
+  html+=`</div>`;
+  // Finals
+  html+=`<div class="stagehdr"><h2>👑 Finals · Best of 3</h2><p>Winner Semi 1 vs Winner Semi 2 · first to 2 wins is crowned</p></div>`;
+  html+=`<div class="groups" style="max-width:460px;margin:18px auto 0">
+    <div class="grp"><h3><span>Finalist 1</span></h3><ol><li>Winner of Semi 1</li></ol></div>
+    <div class="grp"><h3><span>Finalist 2</span></h3><ol><li>Winner of Semi 2</li></ol></div>
+  </div>`;
+  if(b.alts && b.alts.length){
+    html+=`<div class="note">Alternates (signed up beyond 32): ${b.alts.map(u=>'@'+u).join(', ')}</div>`;
+  }
+  html+=`<div class="center" style="margin-top:14px"><span class="count">Drawn ${new Date(b.drawnAt).toLocaleString()}</span></div>`;
+  host.innerHTML=html;
+}
+
+/* boot */
+function updateRosterCount(){
+  const el=document.getElementById('rosterCount');
+  if(el) el.textContent = signups.length+' queens signed up so far';
+}
+renderGate();
+refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); });
+// keep the public roster fresh while the page is open
+setInterval(()=>{ if(!pub.classList.contains('hidden')){ refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); }); } }, 15000);
+</script>
+</body>
+</html>
