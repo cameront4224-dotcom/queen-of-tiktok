@@ -148,7 +148,7 @@
     <div class="adminbar">
       <button class="small cyan" id="drawBtn">🎲 Randomly draw 8 groups of 4</button>
       <button class="small ghost" id="reshuffleBtn">↻ Re-draw</button>
-      <button class="small ghost" id="addTestBtn">+ Add 32 demo names</button>
+      <button class="small ghost" id="addTestBtn">👁 Preview bracket (demo names)</button>
       <button class="small ghost" id="exitAdmin">← Back to sign-up</button>
     </div>
     <div class="center"><span class="count" id="adminCount"></span></div>
@@ -320,11 +320,13 @@ async function draw(){
 }
 document.getElementById('drawBtn').onclick=draw;
 document.getElementById('reshuffleBtn').onclick=draw;
-document.getElementById('addTestBtn').onclick=async()=>{
-  const btn=document.getElementById('addTestBtn'); btn.disabled=true;
-  await refreshSignups();
-  for(let i=1;i<=32;i++){const n='queen'+String(i).padStart(2,'0'); if(!signups.includes(n)){ await sbAdd(n); }}
-  await refreshSignups(); btn.disabled=false; renderAdmin();
+document.getElementById('addTestBtn').onclick=()=>{
+  // Local preview only — does NOT touch the real sign-up database
+  signups = Array.from({length:32},(_,i)=>'demoqueen'+String(i+1).padStart(2,'0'));
+  const pool=shuffle(signups);
+  const groups=[];for(let i=0;i<8;i++)groups.push(pool.slice(i*4,i*4+4));
+  save(LS_BRACKET,{groups,alts:[],drawnAt:new Date().toISOString(),preview:true});
+  renderAdmin();
 };
 
 function renderAdmin(){
@@ -339,7 +341,9 @@ function renderAdmin(){
     return;
   }
   // Round 1
-  let html=`<div class="stagehdr"><h2>Round 1 · 8 Groups of 4</h2><p>Two-strike elimination · last queen standing in each group advances</p></div>`;
+  let html='';
+  if(b.preview){ html+=`<div class="note center">👁 Preview only — these are demo names and do NOT affect your real sign-ups. Click <b>Randomly draw</b> to draw the real bracket.</div>`; }
+  html+=`<div class="stagehdr"><h2>Round 1 · 8 Groups of 4</h2><p>Two-strike elimination · last queen standing in each group advances</p></div>`;
   html+=`<div class="groups">`;
   b.groups.forEach((g,i)=>{
     html+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
