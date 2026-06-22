@@ -292,7 +292,7 @@ async function join(){
 function renderRoster(){
   const r=document.getElementById('roster'); const c=document.getElementById('cnt');
   if(r){ r.innerHTML=signups.map(u=>`<span class="tag">@${u}</span>`).join(''); }
-  if(c){ c.textContent= signups.length+' queens signed up'; }
+  if(c){ c.textContent= signups.length+(signups.length===1?' queen':' queens')+' signed up'; }
 }
 
 /* ---------- admin ---------- */
@@ -373,7 +373,7 @@ function renderAdmin(){
 /* boot */
 function updateRosterCount(){
   const el=document.getElementById('rosterCount');
-  if(el) el.textContent = signups.length+' queens signed up so far';
+  if(el) el.textContent = signups.length+(signups.length===1?' queen':' queens')+' signed up so far';
 }
 renderGate();
 refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); });
