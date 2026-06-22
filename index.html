@@ -73,7 +73,10 @@
   .msg.err{color:#ff7a93}
 
   .roster{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-  .tag{background:#0c0c14;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 13px;font-size:14px}
+  .tag{background:#0c0c14;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 13px;font-size:14px;color:var(--text);text-decoration:none;display:inline-block;transition:all .1s ease}
+  a.tag:hover{border-color:var(--cyan);color:var(--cyan)}
+  a.uname{color:var(--text);text-decoration:none;font-weight:600}
+  a.uname:hover{color:var(--cyan);text-decoration:underline}
   .count{color:var(--muted);font-size:14px;text-align:center;margin-top:8px}
 
   /* admin */
@@ -213,7 +216,7 @@ function groupsHTML(groups){
   let h='<div class="groups">';
   groups.forEach((g,i)=>{
     h+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
-    for(let k=0;k<4;k++){const u=g[k];h+=`<li><span class="n">${k+1}</span>${u?'@'+esc(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
+    for(let k=0;k<4;k++){const u=g[k];h+=`<li><span class="n">${k+1}</span>${u?tlink(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
     h+='</ol></div>';
   });
   return h+'</div>';
@@ -325,6 +328,7 @@ async function revealBracket(){
 }
 function clean(u){return u.trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'')}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tlink(u){const e=esc(u);return `<a class="uname" href="https://www.tiktok.com/@${e}" target="_blank" rel="noopener noreferrer">@${e}</a>`;}
 async function join(){
   const inp=document.getElementById('uname');
   const msg=document.getElementById('msg');
@@ -356,7 +360,7 @@ async function join(){
 }
 function renderRoster(){
   const r=document.getElementById('roster'); const c=document.getElementById('cnt');
-  if(r){ r.innerHTML=signups.map(u=>`<span class="tag">@${esc(u)}</span>`).join(''); }
+  if(r){ r.innerHTML=signups.map(u=>`<a class="tag" href="https://www.tiktok.com/@${esc(u)}" target="_blank" rel="noopener noreferrer">@${esc(u)}</a>`).join(''); }
   if(c){ c.textContent= signups.length+(signups.length===1?' queen':' queens')+' signed up'; }
 }
 
@@ -413,7 +417,7 @@ function renderAdmin(){
   html+=`<div class="groups">`;
   b.groups.forEach((g,i)=>{
     html+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
-    for(let k=0;k<4;k++){const u=g[k];html+=`<li><span class="n">${k+1}</span>${u?'@'+esc(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
+    for(let k=0;k<4;k++){const u=g[k];html+=`<li><span class="n">${k+1}</span>${u?tlink(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
     html+=`</ol></div>`;
   });
   html+=`</div>`;
@@ -434,7 +438,7 @@ function renderAdmin(){
     <div class="grp"><h3><span>Finalist 2</span></h3><ol><li>Winner of Semi 2</li></ol></div>
   </div>`;
   if(b.alts && b.alts.length){
-    html+=`<div class="note">Alternates (signed up beyond 32): ${b.alts.map(u=>'@'+esc(u)).join(', ')}</div>`;
+    html+=`<div class="note">Alternates (signed up beyond 32): ${b.alts.map(u=>tlink(u)).join(', ')}</div>`;
   }
   html+=`<div class="center" style="margin-top:14px"><span class="count">Drawn ${new Date(b.drawnAt).toLocaleString()}</span></div>`;
   host.innerHTML=html;
