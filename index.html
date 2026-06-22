@@ -267,6 +267,7 @@ function renderForm(){
   tick();
 }
 function clean(u){return u.trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function join(){
   const inp=document.getElementById('uname');
   const msg=document.getElementById('msg');
@@ -283,7 +284,7 @@ async function join(){
       inp.value='';
       await refreshSignups();
       msg.className='msg ok';
-      msg.textContent= signups.length>=32 ? '👑 You\'re in! The 32 spots are full.' : '✅ You\'re in, @'+u+'!';
+      msg.textContent= '✅ You\'re in, @'+u+'!';
     } else { msg.className='msg err'; msg.textContent='Something went wrong (code '+st+'). Try again.'; }
   }catch(e){ msg.className='msg err'; msg.textContent='Network hiccup — try again.'; }
   btn.disabled=false;
@@ -291,7 +292,7 @@ async function join(){
 }
 function renderRoster(){
   const r=document.getElementById('roster'); const c=document.getElementById('cnt');
-  if(r){ r.innerHTML=signups.map(u=>`<span class="tag">@${u}</span>`).join(''); }
+  if(r){ r.innerHTML=signups.map(u=>`<span class="tag">@${esc(u)}</span>`).join(''); }
   if(c){ c.textContent= signups.length+(signups.length===1?' queen':' queens')+' signed up'; }
 }
 
@@ -303,7 +304,7 @@ document.getElementById('adminLink').onclick=()=>{
   else { const t=prompt('Admin passcode:'); if(t!==pass){alert('Nope.');return;} }
   pub.classList.add('hidden'); adm.classList.remove('hidden'); refreshSignups().then(renderAdmin);
 };
-document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();};
+document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();refreshSignups().then(()=>{renderRoster();updateRosterCount();});};
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -321,9 +322,9 @@ async function draw(){
 document.getElementById('drawBtn').onclick=draw;
 document.getElementById('reshuffleBtn').onclick=draw;
 document.getElementById('addTestBtn').onclick=()=>{
-  // Local preview only — does NOT touch the real sign-up database
-  signups = Array.from({length:32},(_,i)=>'demoqueen'+String(i+1).padStart(2,'0'));
-  const pool=shuffle(signups);
+  // Local preview only — does NOT touch the real sign-up database or the live roster
+  const demo = Array.from({length:32},(_,i)=>'demoqueen'+String(i+1).padStart(2,'0'));
+  const pool=shuffle(demo);
   const groups=[];for(let i=0;i<8;i++)groups.push(pool.slice(i*4,i*4+4));
   save(LS_BRACKET,{groups,alts:[],drawnAt:new Date().toISOString(),preview:true});
   renderAdmin();
@@ -347,7 +348,7 @@ function renderAdmin(){
   html+=`<div class="groups">`;
   b.groups.forEach((g,i)=>{
     html+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
-    for(let k=0;k<4;k++){const u=g[k];html+=`<li><span class="n">${k+1}</span>${u?'@'+u:'<span style="color:var(--muted)">TBD</span>'}</li>`}
+    for(let k=0;k<4;k++){const u=g[k];html+=`<li><span class="n">${k+1}</span>${u?'@'+esc(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
     html+=`</ol></div>`;
   });
   html+=`</div>`;
@@ -368,7 +369,7 @@ function renderAdmin(){
     <div class="grp"><h3><span>Finalist 2</span></h3><ol><li>Winner of Semi 2</li></ol></div>
   </div>`;
   if(b.alts && b.alts.length){
-    html+=`<div class="note">Alternates (signed up beyond 32): ${b.alts.map(u=>'@'+u).join(', ')}</div>`;
+    html+=`<div class="note">Alternates (signed up beyond 32): ${b.alts.map(u=>'@'+esc(u)).join(', ')}</div>`;
   }
   html+=`<div class="center" style="margin-top:14px"><span class="count">Drawn ${new Date(b.drawnAt).toLocaleString()}</span></div>`;
   host.innerHTML=html;
