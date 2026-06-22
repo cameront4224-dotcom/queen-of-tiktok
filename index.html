@@ -250,21 +250,34 @@ function tick(){
 }
 function renderForm(){
   gate.innerHTML=`
-    <div class="pill live">🔴 Sign-ups are OPEN</div>
+    <div class="pill live" id="statusPill">🔴 Sign-ups are OPEN</div>
     <p style="color:var(--muted);margin:2px 0 14px">Tournament starts ${fmtOpen()}</p>
     <div class="countdown" id="cd"></div>
-    <div class="field">
-      <label>Your TikTok username</label>
-      <div class="at-input"><span>@</span><input id="uname" placeholder="username" autocomplete="off" maxlength="30"/></div>
+    <div id="openBlock">
+      <div class="field">
+        <label>Your TikTok username</label>
+        <div class="at-input"><span>@</span><input id="uname" placeholder="username" autocomplete="off" maxlength="30"/></div>
+      </div>
+      <button id="joinBtn">Enter the competition 👑</button>
+      <div class="msg" id="msg"></div>
     </div>
-    <button id="joinBtn">Enter the competition 👑</button>
-    <div class="msg" id="msg"></div>
+    <div id="fullBlock" class="hidden">
+      <div class="note" style="text-align:center"><b style="color:var(--gold);font-size:18px">👑 The field is set!</b><br/>All 32 spots are filled — sign-ups are closed.<br/><span style="color:var(--muted)">See you Thursday at 10:30 PM EST. 💅</span></div>
+    </div>
     <div class="roster" id="roster"></div>
     <div class="count" id="cnt"></div>`;
   document.getElementById('joinBtn').onclick=join;
   document.getElementById('uname').addEventListener('keydown',e=>{if(e.key==='Enter')join()});
   renderRoster();
+  applyFullState();
   tick();
+}
+function applyFullState(){
+  const full = signups.length>=32;
+  const ob=document.getElementById('openBlock'), fb=document.getElementById('fullBlock'), pill=document.getElementById('statusPill');
+  if(ob) ob.classList.toggle('hidden', full);
+  if(fb) fb.classList.toggle('hidden', !full);
+  if(pill){ pill.textContent = full ? '✅ Sign-ups closed — 32 locked in' : '🔴 Sign-ups are OPEN'; pill.classList.toggle('live', !full); }
 }
 function clean(u){return u.trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'')}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -275,6 +288,7 @@ async function join(){
   const u=clean(inp.value);
   if(!u){msg.className='msg err';msg.textContent='Enter a username first.';return}
   if(!/^[a-z0-9._]{2,30}$/.test(u)){msg.className='msg err';msg.textContent='Use letters, numbers, . or _ only.';return}
+  if(signups.length>=32){ msg.className='msg err'; msg.textContent='Sign-ups are closed — all 32 spots are full.'; applyFullState(); return; }
   if(signups.some(x=>x.toLowerCase()===u)){msg.className='msg err';msg.textContent='@'+u+' is already signed up!';return}
   btn.disabled=true; msg.className='msg'; msg.textContent='Saving…';
   try{
@@ -285,10 +299,16 @@ async function join(){
       await refreshSignups();
       msg.className='msg ok';
       msg.textContent= '✅ You\'re in, @'+u+'!';
-    } else { msg.className='msg err'; msg.textContent='Something went wrong (code '+st+'). Try again.'; }
+    } else {
+      // could be the 32-cap closing right as they submitted
+      await refreshSignups();
+      if(signups.length>=32){ msg.className='msg err'; msg.textContent='Sign-ups just closed — all 32 spots filled.'; }
+      else { msg.className='msg err'; msg.textContent='Something went wrong (code '+st+'). Try again.'; }
+    }
   }catch(e){ msg.className='msg err'; msg.textContent='Network hiccup — try again.'; }
   btn.disabled=false;
   renderRoster();
+  applyFullState();
 }
 function renderRoster(){
   const r=document.getElementById('roster'); const c=document.getElementById('cnt');
@@ -304,7 +324,7 @@ document.getElementById('adminLink').onclick=()=>{
   else { const t=prompt('Admin passcode:'); if(t!==pass){alert('Nope.');return;} }
   pub.classList.add('hidden'); adm.classList.remove('hidden'); refreshSignups().then(renderAdmin);
 };
-document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();refreshSignups().then(()=>{renderRoster();updateRosterCount();});};
+document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();refreshSignups().then(()=>{renderRoster();updateRosterCount();applyFullState();});};
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -381,9 +401,9 @@ function updateRosterCount(){
   if(el) el.textContent = signups.length+(signups.length===1?' queen':' queens')+' signed up so far';
 }
 renderGate();
-refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); });
+refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); applyFullState(); });
 // keep the public roster fresh while the page is open
-setInterval(()=>{ if(!pub.classList.contains('hidden')){ refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); }); } }, 15000);
+setInterval(()=>{ if(!pub.classList.contains('hidden')){ refreshSignups().then(()=>{ renderRoster(); updateRosterCount(); applyFullState(); }); } }, 15000);
 </script>
 </body>
 </html>
