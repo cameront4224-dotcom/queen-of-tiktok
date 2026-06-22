@@ -201,6 +201,23 @@ async function sbAdd(u){
   const r=await fetch(SB_URL+'/rest/v1/signups',{method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},body:JSON.stringify({username:u})});
   return r.status; // 201 = added, 409 = duplicate
 }
+async function sbGetBracket(){
+  try{ const r=await fetch(SB_URL+'/rest/v1/bracket?id=eq.1&select=groups,drawn_at',{headers:SB_H}); if(!r.ok) return null; const a=await r.json(); return a[0]||null; }
+  catch(e){ return null; }
+}
+async function sbSetBracket(groups){
+  const r=await fetch(SB_URL+'/rest/v1/bracket',{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:1,groups,drawn_at:new Date().toISOString()})});
+  return r.status;
+}
+function groupsHTML(groups){
+  let h='<div class="groups">';
+  groups.forEach((g,i)=>{
+    h+=`<div class="grp"><h3><span>Group ${String.fromCharCode(65+i)}</span><span>→ 1 advances</span></h3><ol>`;
+    for(let k=0;k<4;k++){const u=g[k];h+=`<li><span class="n">${k+1}</span>${u?'@'+esc(u):'<span style="color:var(--muted)">TBD</span>'}</li>`}
+    h+='</ol></div>';
+  });
+  return h+'</div>';
+}
 
 let signups = [];
 async function refreshSignups(){ try{ signups=await sbList(); return true; }catch(e){ return false; } }
@@ -262,7 +279,8 @@ function renderForm(){
       <div class="msg" id="msg"></div>
     </div>
     <div id="fullBlock" class="hidden">
-      <div class="note" style="text-align:center"><b style="color:var(--gold);font-size:18px">👑 The field is set!</b><br/>All 32 spots are filled — sign-ups are closed.<br/><span style="color:var(--muted)">See you Thursday at 10:30 PM EST. 💅</span></div>
+      <div class="note" style="text-align:center"><b style="color:var(--gold);font-size:18px">👑 The field is set — 32 queens locked in!</b><br/>Sign-ups are closed. Here are your Round 1 groups 👇<br/><span style="color:var(--muted)">Tournament starts Thursday at 10:30 PM EST. 💅</span></div>
+      <div id="publicBracket"><div class="count" style="text-align:center">Drawing the groups…</div></div>
     </div>
     <div class="roster" id="roster"></div>
     <div class="count" id="cnt"></div>`;
@@ -275,9 +293,35 @@ function renderForm(){
 function applyFullState(){
   const full = signups.length>=32;
   const ob=document.getElementById('openBlock'), fb=document.getElementById('fullBlock'), pill=document.getElementById('statusPill');
+  const ro=document.getElementById('roster'), cn=document.getElementById('cnt');
   if(ob) ob.classList.toggle('hidden', full);
   if(fb) fb.classList.toggle('hidden', !full);
+  if(ro) ro.classList.toggle('hidden', full);   // groups already list everyone
+  if(cn) cn.classList.toggle('hidden', full);
   if(pill){ pill.textContent = full ? '✅ Sign-ups closed — 32 locked in' : '🔴 Sign-ups are OPEN'; pill.classList.toggle('live', !full); }
+  if(full) revealBracket();
+}
+let revealing=false;
+async function revealBracket(){
+  if(revealing) return; revealing=true;
+  try{
+    const host=document.getElementById('publicBracket');
+    if(!host){ return; }
+    let b=await sbGetBracket();
+    if(!b || !b.groups){
+      // first to reach a full field draws the official bracket, once
+      if(signups.length<32) await refreshSignups();
+      if(signups.length>=32){
+        const pool=shuffle(signups);
+        const groups=[]; for(let i=0;i<8;i++) groups.push(pool.slice(i*4,i*4+4));
+        await sbSetBracket(groups);
+        b=await sbGetBracket();
+      }
+    }
+    if(b && b.groups){
+      host.innerHTML='<div class="stagehdr"><h2>Round 1 · 8 Groups of 4</h2><p>Two-strike elimination · last queen standing in each group advances</p></div>'+groupsHTML(b.groups);
+    }
+  } finally { revealing=false; }
 }
 function clean(u){return u.trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'')}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -322,7 +366,8 @@ document.getElementById('adminLink').onclick=()=>{
   let pass=load(LS_PASS,null);
   if(!pass){ pass=prompt('Set an admin passcode (you\'ll use this each time):'); if(!pass)return; save(LS_PASS,pass); }
   else { const t=prompt('Admin passcode:'); if(t!==pass){alert('Nope.');return;} }
-  pub.classList.add('hidden'); adm.classList.remove('hidden'); refreshSignups().then(renderAdmin);
+  pub.classList.add('hidden'); adm.classList.remove('hidden');
+  refreshSignups().then(async()=>{ const bk=await sbGetBracket(); if(bk&&bk.groups){ save(LS_BRACKET,{groups:bk.groups,alts:[],drawnAt:bk.drawn_at}); } renderAdmin(); });
 };
 document.getElementById('exitAdmin').onclick=()=>{adm.classList.add('hidden');pub.classList.remove('hidden');renderGate();refreshSignups().then(()=>{renderRoster();updateRosterCount();applyFullState();});};
 
@@ -337,6 +382,7 @@ async function draw(){
   for(let i=0;i<8;i++) groups.push(field.slice(i*4,i*4+4));
   const bracket={groups,alts,drawnAt:new Date().toISOString()};
   save(LS_BRACKET,bracket);
+  await sbSetBracket(groups); // publish so it shows publicly on the live site
   renderAdmin();
 }
 document.getElementById('drawBtn').onclick=draw;
