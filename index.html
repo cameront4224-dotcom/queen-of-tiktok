@@ -362,10 +362,9 @@ function renderRoster(){
 
 /* ---------- admin ---------- */
 const pub=document.getElementById('public'), adm=document.getElementById('admin');
+const ADMIN_PASS='Queenjune';
 document.getElementById('adminLink').onclick=()=>{
-  let pass=load(LS_PASS,null);
-  if(!pass){ pass=prompt('Set an admin passcode (you\'ll use this each time):'); if(!pass)return; save(LS_PASS,pass); }
-  else { const t=prompt('Admin passcode:'); if(t!==pass){alert('Nope.');return;} }
+  const t=prompt('Admin passcode:'); if(t!==ADMIN_PASS){ if(t!==null) alert('Nope.'); return; }
   pub.classList.add('hidden'); adm.classList.remove('hidden');
   refreshSignups().then(async()=>{ const bk=await sbGetBracket(); if(bk&&bk.groups){ save(LS_BRACKET,{groups:bk.groups,alts:[],drawnAt:bk.drawn_at}); } renderAdmin(); });
 };
