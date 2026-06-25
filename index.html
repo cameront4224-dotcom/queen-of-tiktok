@@ -227,6 +227,32 @@ function groupsHTML(groups){
   });
   return h+'</div>';
 }
+/* ----- shareable plain text for the admin ----- */
+const RULES_TEXT =
+`👑 QUEEN OF TIKTOK — THE RULES 👑
+
+32 queens are randomly drawn into 8 groups of 4. This is the first elimination series.
+
+ROUND 1 — Two strikes you're out
+In each group of 4, the lowest score each round gets a strike. Two strikes and you leave. Play continues until one queen is left standing in each group. The 8 group winners advance.
+
+ROUND 2 — 2 groups of 4, one strike
+The 8 winners are split into 2 groups of 4. The lowest score each round gets a strike, and one strike eliminates you. The last queen standing in each group makes the finals.
+
+FINALS — Best of 3
+The two finalists go head-to-head. First to win 2 out of 3 is crowned Queen of TikTok. 👑
+
+Tournament starts Thursday at 10:30 PM EST.`;
+function groupsText(groups){
+  let t='👑 QUEEN OF TIKTOK — ROUND 1 GROUPS 👑\n\n';
+  groups.forEach((g,i)=>{ t+='GROUP '+String.fromCharCode(65+i)+'\n'+g.map(u=>'@'+u).join('\n')+'\n\n'; });
+  return t.trim();
+}
+async function copyText(str, btn){
+  try{ await navigator.clipboard.writeText(str); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=str; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); }
+  if(btn){ const o=btn.textContent; btn.textContent='✅ Copied!'; setTimeout(()=>{btn.textContent=o;},1600); }
+}
 
 let signups = [];
 async function refreshSignups(){ try{ signups=await sbList(); return true; }catch(e){ return false; } }
@@ -434,6 +460,7 @@ function renderAdmin(){
   // Round 1
   let html='';
   if(b.preview){ html+=`<div class="note center">👁 Preview only — these are demo names and do NOT affect your real sign-ups. Click <b>Randomly draw</b> to draw the real bracket.</div>`; }
+  else { html+=`<div class="adminbar" style="margin:0 0 8px"><button class="small cyan" id="copyGroups">📋 Copy groups</button><button class="small cyan" id="copyRules">📋 Copy rules</button><button class="small cyan" id="copyAll">📋 Copy groups + rules</button></div>`; }
   html+=`<div class="stagehdr"><h2>Round 1 · 8 Groups of 4</h2><p>Two-strike elimination · last queen standing in each group advances</p></div>`;
   html+=`<div class="groups">`;
   b.groups.forEach((g,i)=>{
@@ -463,6 +490,9 @@ function renderAdmin(){
   }
   html+=`<div class="center" style="margin-top:14px"><span class="count">Drawn ${new Date(b.drawnAt).toLocaleString()}</span></div>`;
   host.innerHTML=html;
+  const cg=document.getElementById('copyGroups'); if(cg) cg.onclick=()=>copyText(groupsText(b.groups), cg);
+  const cr=document.getElementById('copyRules'); if(cr) cr.onclick=()=>copyText(RULES_TEXT, cr);
+  const ca=document.getElementById('copyAll'); if(ca) ca.onclick=()=>copyText(groupsText(b.groups)+'\n\n'+RULES_TEXT, ca);
 }
 
 /* boot */
