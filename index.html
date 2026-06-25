@@ -156,6 +156,8 @@
     </div>
     <div class="center"><span class="count" id="adminCount"></span></div>
 
+    <div id="manage"></div>
+
     <div id="bracket"></div>
 
     <!-- Rules -->
@@ -211,6 +213,10 @@ async function sbGetBracket(){
 async function sbSetBracket(groups){
   const r=await fetch(SB_URL+'/rest/v1/bracket',{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:1,groups,drawn_at:new Date().toISOString()})});
   return r.status;
+}
+async function sbRemove(u){
+  try{ const r=await fetch(SB_URL+'/rest/v1/rpc/remove_signup',{method:'POST',headers:SB_H,body:JSON.stringify({uname:u,pass:ADMIN_PASS})}); return r.ok; }
+  catch(e){ return false; }
 }
 function groupsHTML(groups){
   let h='<div class="groups">';
@@ -399,8 +405,23 @@ document.getElementById('addTestBtn').onclick=()=>{
   renderAdmin();
 };
 
+function renderManage(){
+  const m=document.getElementById('manage'); if(!m) return;
+  if(!signups.length){ m.innerHTML=''; return; }
+  m.innerHTML='<div class="stagehdr"><h2>Manage Sign-ups</h2><p>Click ✕ to remove a queen from the competition</p></div>'+
+    '<div class="roster">'+signups.map(u=>`<span class="tag" style="display:inline-flex;align-items:center;gap:8px">@${esc(u)} <button class="rm" data-u="${esc(u)}" title="Remove ${esc(u)}" style="background:none;border:0;color:#ff7a93;cursor:pointer;font-size:15px;font-weight:900;line-height:1;padding:0;width:auto;box-shadow:none">✕</button></span>`).join('')+'</div>';
+  m.querySelectorAll('button.rm').forEach(b=>{ b.onclick=()=>removeSignup(b.dataset.u); });
+}
+async function removeSignup(u){
+  if(!confirm('Remove @'+u+' from the competition? This deletes their sign-up.')) return;
+  const ok=await sbRemove(u);
+  if(!ok){ alert('Could not remove @'+u+'. Try again.'); return; }
+  await refreshSignups();
+  renderAdmin();
+}
 function renderAdmin(){
   document.getElementById('adminCount').textContent = signups.length+' signed up · field is 32';
+  renderManage();
   const b=load(LS_BRACKET,null);
   const host=document.getElementById('bracket');
   if(!b || !b.groups){
